@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">CurencyConverterApp</string>
+    <string name="text_view_from_text">From</string>
+    <string name="text_view_to_text">To</string>
+    <string name="text_view_amount_text">Amount</string>
+    <string name="text_view_result_text">Result</string>
+    <string-array name="currency">
+        <item>USD</item>
+        <item>VND</item>
+        <item>EUR</item>
+        <item>GBP</item>
+    </string-array>
+
+</resources>
