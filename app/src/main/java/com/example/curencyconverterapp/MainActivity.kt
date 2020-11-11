@@ -10,14 +10,17 @@ import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.Spinner
 import androidx.appcompat.app.AppCompatActivity
+import com.beust.klaxon.JsonArray
+import com.beust.klaxon.JsonObject
+import com.beust.klaxon.Parser
 import okhttp3.*
-import org.json.JSONObject
 import java.io.IOException
 
 
 class MainActivity : AppCompatActivity()
 {
     private val client = OkHttpClient()
+    private val parser: Parser = Parser.default()
 
     val API_KEY = "b77f68582182c969fccf"
 
@@ -84,8 +87,13 @@ class MainActivity : AppCompatActivity()
 
     private fun add_data_to_spinner(spinner: Spinner)
     {
+        val currencies_url = "https://free.currconv.com/api/v7/currencies?apiKey=${API_KEY}"
+        println(currencies_url)
+        val data = response_from_API_call(currencies_url) as JsonArray<JsonObject>
+        println(data.string("id"))
+
         val arraySpinner = arrayOf(
-            "1", "2", "3", "4", "5", "6", "7"
+            "USD", "2", "3", "4", "5", "6", "7"
         )
         val adapter = ArrayAdapter(
             this,
@@ -99,25 +107,25 @@ class MainActivity : AppCompatActivity()
     {
         var rate: Double = 0.0
 
-        val from_to: String = "${from}_${to}"
-        val api_url =
-            "https://free.currconv.com/api/v7/convert?q=${from_to}&compact=ultra&apiKey=${API_KEY}"
+        val key: String = "${from}_${to}"
+        val convert_url =
+            "https://free.currconv.com/api/v7/convert?q=${key}&compact=ultra&apiKey=${API_KEY}"
 
         try
         {
-            rate = response_from_API_call(api_url, from_to).toDouble()
+            val data = response_from_API_call(convert_url) as JsonObject
+            rate = data.get(key).toString().toDouble()
         }
         catch (e: Exception)
         {
             println(e)
         }
-
         return rate
     }
 
-    private fun response_from_API_call(url: String, key: String): String
+    private fun response_from_API_call(url: String): Any?
     {
-        var result: String = "No response"
+        var result: Any? = null
 
         val request = Request.Builder()
             .url(url)
@@ -133,10 +141,14 @@ class MainActivity : AppCompatActivity()
 
             override fun onResponse(call: Call, response: Response)
             {
-                val json_object = JSONObject(response.body?.string())
                 try
                 {
-                    result = json_object.getString(key)
+                    val api_response = response.body?.string()
+                    val stringBuilder: StringBuilder =
+                        StringBuilder(api_response)
+                    val json = parser.parse(stringBuilder)
+
+                    result = json
                 }
                 catch (e: Exception)
                 {
