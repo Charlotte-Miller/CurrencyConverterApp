@@ -10,17 +10,12 @@ import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.Spinner
 import androidx.appcompat.app.AppCompatActivity
-import okhttp3.*
 import org.json.JSONObject
 import java.io.IOException
 
 
 class MainActivity : AppCompatActivity()
 {
-    private val client = OkHttpClient()
-
-    val API_KEY = "b77f68582182c969fccf"
-
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
@@ -32,7 +27,8 @@ class MainActivity : AppCompatActivity()
         val EditText_amount = findViewById<EditText>(R.id.edit_text_amount)
         val EditText_result = findViewById<EditText>(R.id.edit_text_result)
 
-        add_data_to_spinner(spinner_from)
+        add_currencies_to_spinners(spinner_from)
+        add_currencies_to_spinners(spinner_to)
 
         // Set up default currency for both Spinners
         spinner_from.setSelection(0)
@@ -51,7 +47,7 @@ class MainActivity : AppCompatActivity()
                 val from = spinner_from.selectedItem.toString()
                 val to = spinner_to.selectedItem.toString()
 
-                val rate: Double = get_rate(from, to)
+//                val rate: Double = get_rate(from, to)
             }
 
             override fun onNothingSelected(parentView: AdapterView<*>?)
@@ -82,68 +78,16 @@ class MainActivity : AppCompatActivity()
         })
     }
 
-    private fun add_data_to_spinner(spinner: Spinner)
+    private fun add_currencies_to_spinners(spinner: Spinner)
     {
-        val arraySpinner = arrayOf(
-            "1", "2", "3", "4", "5", "6", "7"
-        )
+        // Get all currencies from enum Currency
+        val currencies = Currency.get_currency_list()
+
         val adapter = ArrayAdapter(
             this,
-            android.R.layout.simple_spinner_item, arraySpinner
+            android.R.layout.simple_spinner_item, currencies
         )
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = adapter
-    }
-
-    private fun get_rate(from: String, to: String): Double
-    {
-        var rate: Double = 0.0
-
-        val from_to: String = "${from}_${to}"
-        val api_url =
-            "https://free.currconv.com/api/v7/convert?q=${from_to}&compact=ultra&apiKey=${API_KEY}"
-
-        try
-        {
-            rate = response_from_API_call(api_url, from_to).toDouble()
-        }
-        catch (e: Exception)
-        {
-            println(e)
-        }
-
-        return rate
-    }
-
-    private fun response_from_API_call(url: String, key: String): String
-    {
-        var result: String = "No response"
-
-        val request = Request.Builder()
-            .url(url)
-            .build()
-
-        client.newCall(request).enqueue(object : Callback
-        {
-
-            override fun onFailure(call: Call, e: IOException)
-            {
-                println(e)
-            }
-
-            override fun onResponse(call: Call, response: Response)
-            {
-                val json_object = JSONObject(response.body?.string())
-                try
-                {
-                    result = json_object.getString(key)
-                }
-                catch (e: Exception)
-                {
-                    println(e)
-                }
-            }
-        })
-        return result
     }
 }
