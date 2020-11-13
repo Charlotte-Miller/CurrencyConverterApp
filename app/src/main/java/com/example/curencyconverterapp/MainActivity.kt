@@ -4,11 +4,8 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
-import android.widget.AdapterView
+import android.widget.*
 import android.widget.AdapterView.OnItemSelectedListener
-import android.widget.ArrayAdapter
-import android.widget.EditText
-import android.widget.Spinner
 import androidx.appcompat.app.AppCompatActivity
 import java.text.NumberFormat
 import java.util.*
@@ -29,6 +26,10 @@ class MainActivity : AppCompatActivity()
 
         val EditText_amount = findViewById<EditText>(R.id.edit_text_amount)
         val EditText_result = findViewById<EditText>(R.id.edit_text_result)
+
+        val TextView_last: TextView = findViewById<TextView>(R.id.last_updated)
+
+        TextView_last.setText(EnumCurrency.get_last_updated())
 
         // Set up items for both Spinners
         set_up_spinners(spinner_from, spinner_to)
