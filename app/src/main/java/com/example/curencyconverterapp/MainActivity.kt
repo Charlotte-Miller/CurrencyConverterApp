@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity()
 
         val TextView_last: TextView = findViewById<TextView>(R.id.last_updated)
 
-        TextView_last.setText("Last updated: ${EnumCurrency.get_last_updated()}")
+        TextView_last.text = "Last updated: ${EnumCurrency.get_last_updated()}"
 
         // Set up items for both Spinners
         set_up_spinners(spinner_from, spinner_to)
