@@ -1,17 +1,14 @@
 package com.example.curencyconverterapp
 
-import android.os.Build
-import androidx.annotation.RequiresApi
-import java.util.*
 import kotlin.collections.ArrayList
 
-enum class Currency(val exchange_rate_to_USD: Double = 1.0)
+enum class EnumCurrency(val exchange_rate_to_USD: Double = 1.0)
 {
     USD(1.0),
+    VND(0.0000430597),
     EUR(1.18082),
     GBP(1.31362),
-    INR(0.0133905),
-    VND(0.0000430597);
+    INR(0.0133905);
 
     companion object
     {
@@ -20,7 +17,7 @@ enum class Currency(val exchange_rate_to_USD: Double = 1.0)
         fun get_currency_list(): ArrayList<String>
         {
             val currencies = ArrayList<String>()
-            for (currency in Currency.values())
+            for (currency in EnumCurrency.values())
             {
                 currencies.add(currency.name)
             }
@@ -28,4 +25,3 @@ enum class Currency(val exchange_rate_to_USD: Double = 1.0)
         }
     }
 }
-

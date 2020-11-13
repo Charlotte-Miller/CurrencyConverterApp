@@ -10,29 +10,28 @@ import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.Spinner
 import androidx.appcompat.app.AppCompatActivity
-import org.json.JSONObject
-import java.io.IOException
+import java.text.NumberFormat
+import java.util.*
 
 
 class MainActivity : AppCompatActivity()
 {
+    var converter = Converter(EnumCurrency.USD, EnumCurrency.VND)
+
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // Initialize
         val spinner_from = findViewById<Spinner>(R.id.spinner_from)
         val spinner_to = findViewById<Spinner>(R.id.spinner_to)
 
         val EditText_amount = findViewById<EditText>(R.id.edit_text_amount)
         val EditText_result = findViewById<EditText>(R.id.edit_text_result)
 
-        add_currencies_to_spinners(spinner_from)
-        add_currencies_to_spinners(spinner_to)
-
-        // Set up default currency for both Spinners
-        spinner_from.setSelection(0)
-        spinner_to.setSelection(1)
+        // Set up items for both Spinners
+        set_up_spinners(spinner_from, spinner_to)
 
         spinner_from.onItemSelectedListener = object : OnItemSelectedListener
         {
@@ -47,7 +46,45 @@ class MainActivity : AppCompatActivity()
                 val from = spinner_from.selectedItem.toString()
                 val to = spinner_to.selectedItem.toString()
 
-//                val rate: Double = get_rate(from, to)
+                // Set converter for current currencies
+                converter = Converter(EnumCurrency.valueOf(from), EnumCurrency.valueOf(to))
+
+                // Re-render the exchanged money if select another currency
+                if (!EditText_amount.text.isNullOrEmpty())
+                {
+                    val amount = EditText_amount.text.toString().toDouble()
+                    convert_then_render(amount, EditText_result)
+                }
+            }
+
+            override fun onNothingSelected(parentView: AdapterView<*>?)
+            {
+                // your code here
+            }
+        }
+
+        spinner_to.onItemSelectedListener = object : OnItemSelectedListener
+        {
+            override fun onItemSelected(
+                parentView: AdapterView<*>?,
+                selectedItemView: View?,
+                position: Int,
+                id: Long
+            )
+            {
+                //Get current selected currencies
+                val from = spinner_from.selectedItem.toString()
+                val to = spinner_to.selectedItem.toString()
+
+                // Set converter for current currencies
+                converter = Converter(EnumCurrency.valueOf(from), EnumCurrency.valueOf(to))
+
+                // Re-render the exchanged money if select another currency
+                if (!EditText_amount.text.isNullOrEmpty())
+                {
+                    val amount = EditText_amount.text.toString().toDouble()
+                    convert_then_render(amount, EditText_result)
+                }
             }
 
             override fun onNothingSelected(parentView: AdapterView<*>?)
@@ -59,10 +96,13 @@ class MainActivity : AppCompatActivity()
         // Repeatedly convert when Amount's text changed
         EditText_amount.addTextChangedListener(object : TextWatcher
         {
-            var result: Double = 0.0
             override fun afterTextChanged(current_text: Editable?)
             {
-
+                if (!current_text.isNullOrBlank())
+                {
+                    val amount: Double = current_text.toString().toDouble()
+                    convert_then_render(amount, EditText_result)
+                }
             }
 
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int)
@@ -78,10 +118,57 @@ class MainActivity : AppCompatActivity()
         })
     }
 
+    private fun convert_then_render(
+        amount: Double,
+        rendered_EditText: EditText
+    )
+    {
+        try
+        {
+            val result: Double = converter.convert(amount)
+
+            // Format the Results text to Currency format
+            rendered_EditText.setText(
+                formatted_currency(
+                    result,
+                    converter.get_to_currency().name
+                )
+            )
+
+        }
+        catch (e: Exception)
+        {
+            rendered_EditText.setText("Error")
+        }
+    }
+
+    private fun formatted_currency(amount: Double, currency: String): String
+    {
+        val format: NumberFormat = NumberFormat.getCurrencyInstance()
+        format.maximumFractionDigits = 0
+        format.currency = Currency.getInstance(currency)
+
+        return format.format(amount)
+    }
+
+    private fun set_up_spinners(
+        spinner_from: Spinner,
+        spinner_to: Spinner
+    )
+    {
+        add_currencies_to_spinners(spinner_from)
+        add_currencies_to_spinners(spinner_to)
+
+        // Set USD and VND as default currency for both Spinners
+        spinner_from.setSelection(EnumCurrency.USD.ordinal)
+        spinner_to.setSelection(EnumCurrency.VND.ordinal)
+    }
+
+    // Add all currencies from enum Currency to Spinner
     private fun add_currencies_to_spinners(spinner: Spinner)
     {
         // Get all currencies from enum Currency
-        val currencies = Currency.get_currency_list()
+        val currencies = EnumCurrency.get_currency_list()
 
         val adapter = ArrayAdapter(
             this,
