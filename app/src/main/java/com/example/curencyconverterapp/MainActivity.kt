@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity()
 
         val TextView_last: TextView = findViewById<TextView>(R.id.last_updated)
 
-        TextView_last.setText(EnumCurrency.get_last_updated())
+        TextView_last.setText("Last updated: ${EnumCurrency.get_last_updated()}")
 
         // Set up items for both Spinners
         set_up_spinners(spinner_from, spinner_to)
@@ -146,7 +146,7 @@ class MainActivity : AppCompatActivity()
     private fun formatted_currency(amount: Double, currency: String): String
     {
         val format: NumberFormat = NumberFormat.getCurrencyInstance()
-        format.maximumFractionDigits = 0
+        format.maximumFractionDigits = 2
         format.currency = Currency.getInstance(currency)
 
         return format.format(amount)
